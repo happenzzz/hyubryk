@@ -1,0 +1,1258 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>협력수업 전략 배치도</title>
+  <style>
+    :root {
+      --bg: #101827;
+      --ink: #0f172a;
+      --board: #f8fafc;
+      --board-2: #edf4fc;
+      --orange: #ff8a24;
+      --student: #858585;
+      --teacher-size: clamp(74px, 5.9vw, 116px);
+      --seat-w: clamp(86px, 7.1vw, 134px);
+      --seat-h: clamp(68px, 5.2vw, 98px);
+      --radius: 24px;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: radial-gradient(circle at top, #22314e 0%, #101827 45%, #0b1020 100%);
+      color: white;
+      overscroll-behavior: none;
+    }
+
+    body {
+      -webkit-font-smoothing: antialiased;
+      text-rendering: geometricPrecision;
+    }
+
+    button {
+      font: inherit;
+      border: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(390px, .8fr) 1.2fr;
+      gap: 14px;
+      align-items: center;
+      min-height: 132px;
+      padding: 14px 16px;
+      border: 1px solid rgba(255,255,255,.11);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      box-shadow: 0 18px 45px rgba(0,0,0,.26);
+    }
+
+    .title-wrap { min-width: 0; }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 2.45vw, 48px);
+      line-height: 1.02;
+      letter-spacing: -0.06em;
+      font-weight: 1000;
+      color: #ffffff;
+      text-shadow: 0 2px 1px rgba(0,0,0,.24);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .subline {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px 13px;
+      margin-top: 10px;
+      color: #dbeafe;
+      font-size: clamp(13px, .95vw, 18px);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .legend-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      color: #fff;
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 1000;
+      background: var(--orange);
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.18);
+    }
+
+    .legend-sl-icon {
+      width: 44px;
+      height: 32px;
+      display: inline-block;
+      transform: translateY(-1px);
+    }
+
+    .legend-sl-icon svg { width: 100%; height: 100%; overflow: visible; display: block; }
+
+    .controls {
+      display: grid;
+      gap: 10px;
+      justify-items: end;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .btn {
+      min-height: 48px;
+      padding: 0 15px;
+      border-radius: 15px;
+      background: rgba(255,255,255,.93);
+      color: #0f172a;
+      font-size: clamp(15px, .98vw, 19px);
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      box-shadow: 0 8px 0 rgba(0,0,0,.18), 0 12px 20px rgba(0,0,0,.21);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease, outline .12s ease;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 3px 0 rgba(0,0,0,.18), 0 6px 11px rgba(0,0,0,.21);
+    }
+
+    .btn.active {
+      background: linear-gradient(180deg, #ffb25f, var(--orange));
+      color: #241100;
+      outline: 4px solid rgba(255,255,255,.34);
+    }
+
+    .btn.secondary { background: #dbeafe; }
+    .btn.danger { background: #fee2e2; color: #7f1d1d; }
+    .btn.pen-on { background: linear-gradient(180deg, #fde68a, #f59e0b); color: #1f1300; }
+
+    .palette {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+
+    .color-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 999px;
+      background: var(--swatch);
+      border: 4px solid rgba(255,255,255,.78);
+      box-shadow: inset 0 0 0 2px rgba(0,0,0,.20), 0 5px 10px rgba(0,0,0,.18);
+    }
+
+    .color-btn.selected {
+      outline: 5px solid rgba(255,255,255,.35);
+      transform: scale(1.08);
+    }
+
+    .stage-shell {
+      min-height: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .stage {
+      position: relative;
+      width: min(100%, calc((100dvh - 166px) * 16 / 9));
+      aspect-ratio: 16 / 9;
+      max-height: calc(100dvh - 166px);
+      border-radius: 30px;
+      overflow: hidden;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(59,130,246,.055) 1px, transparent 1px) 0 0 / 5% 5%,
+        linear-gradient(0deg, rgba(59,130,246,.055) 1px, transparent 1px) 0 0 / 5% 5%,
+        radial-gradient(circle at 50% 8%, #ffffff 0, #ffffff 12%, var(--board) 47%, var(--board-2) 100%);
+      border: 6px solid rgba(255,255,255,.84);
+      box-shadow: 0 24px 70px rgba(0,0,0,.42), inset 0 0 0 3px rgba(15,23,42,.14);
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: none;
+    }
+
+    .front-board {
+      position: absolute;
+      left: 50%;
+      top: 2.5%;
+      transform: translateX(-50%);
+      width: 38%;
+      height: 8.5%;
+      min-height: 46px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #1f2937, #111827);
+      border: 4px solid rgba(15,23,42,.9);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: clamp(19px, 1.65vw, 34px);
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      box-shadow: 0 8px 0 rgba(15,23,42,.22);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .formation-title {
+      position: absolute;
+      left: 2.2%;
+      top: 2.5%;
+      width: 28%;
+      min-width: 250px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,.92);
+      border: 2px solid rgba(15,23,42,.14);
+      color: #0f172a;
+      line-height: 1.08;
+      box-shadow: 0 8px 18px rgba(15,23,42,.12);
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .formation-title strong {
+      display: block;
+      font-size: clamp(18px, 1.35vw, 28px);
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+    }
+
+    .formation-title small {
+      display: block;
+      margin-top: 4px;
+      color: #334155;
+      font-size: clamp(12px, .78vw, 16px);
+      font-weight: 900;
+      letter-spacing: -0.035em;
+    }
+
+    .status-chip {
+      position: absolute;
+      right: 2.2%;
+      top: 2.5%;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      border: 2px solid rgba(15,23,42,.14);
+      color: #0f172a;
+      font-size: clamp(14px, .98vw, 20px);
+      font-weight: 1000;
+      letter-spacing: -0.03em;
+      box-shadow: 0 8px 18px rgba(15,23,42,.12);
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .status-chip strong { color: #ea580c; }
+
+    #divisionZones,
+    #groupTables,
+    #parallelZones,
+    .support-table,
+    .students-layer,
+    .tokens-layer,
+    .drawing-canvas {
+      position: absolute;
+      inset: 0;
+    }
+
+    #divisionZones {
+      z-index: 1;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity .25s ease;
+    }
+
+    .division-zone {
+      position: absolute;
+      top: 21.4%;
+      height: 56.8%;
+      border: 4px dashed rgba(37,99,235,.20);
+      border-radius: 22px;
+      background: rgba(219,234,254,.13);
+    }
+
+    .division-zone span {
+      position: absolute;
+      left: 50%;
+      top: -18px;
+      transform: translate(-50%, -50%);
+      min-width: 116px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: #1e3a8a;
+      background: rgba(219,234,254,.98);
+      border: 2px solid rgba(37,99,235,.24);
+      font-size: clamp(15px, 1.05vw, 20px);
+      line-height: 1;
+      font-weight: 1000;
+      text-align: center;
+      box-shadow: 0 6px 12px rgba(15,23,42,.08);
+      white-space: nowrap;
+    }
+
+    .division-zone em {
+      font-style: normal;
+      font-size: .68em;
+      color: #3b82f6;
+    }
+
+    .stage[data-mode="station"] #divisionZones,
+    .stage[data-mode="parallel"] #divisionZones {
+      opacity: 0;
+    }
+
+    #groupTables, #parallelZones {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .group-table,
+    .support-table {
+      position: absolute;
+      transform: translate(-50%, -50%) scale(.92);
+      border: clamp(4px, .34vw, 6px) solid #161616;
+      border-radius: 18px;
+      background: rgba(255,255,255,.65);
+      box-shadow: inset 0 0 0 999px rgba(249,250,251,.15), 0 12px 22px rgba(15,23,42,.08);
+      opacity: 0;
+      transition: opacity .28s ease, transform .28s ease;
+    }
+
+    .group-table {
+      width: 20.5%;
+      height: 17%;
+    }
+
+    .group-table::after,
+    .support-table::after {
+      content: attr(data-label);
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: rgba(15,23,42,.30);
+      font-size: clamp(20px, 1.75vw, 34px);
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+      text-align: center;
+    }
+
+    .stage[data-mode="station"] .group-table {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    .support-table {
+      left: 50%;
+      top: 72%;
+      width: 25%;
+      height: 16%;
+      z-index: 2;
+      background: rgba(255,255,255,.80);
+    }
+
+    .support-table::before {
+      content: "대안 소그룹";
+      position: absolute;
+      left: 50%;
+      top: -34px;
+      transform: translateX(-50%);
+      padding: 7px 12px;
+      border-radius: 999px;
+      color: #7c2d12;
+      background: #ffedd5;
+      border: 2px solid rgba(234,88,12,.22);
+      font-size: clamp(14px, .92vw, 18px);
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .stage[data-mode="alternative"] .support-table {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+    }
+
+    #parallelZones {
+      opacity: 0;
+      transition: opacity .25s ease;
+    }
+
+    .stage[data-mode="parallel"] #parallelZones { opacity: 1; }
+
+    .parallel-zone {
+      position: absolute;
+      left: 5.5%;
+      width: 89%;
+      height: 29%;
+      border: 7px solid var(--orange);
+      border-radius: 8px;
+      background: rgba(255,138,36,.045);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.88) inset, 0 8px 18px rgba(15,23,42,.08);
+    }
+
+    .parallel-zone.front { top: 21.5%; }
+    .parallel-zone.back { top: 52.5%; }
+
+    .parallel-zone span {
+      position: absolute;
+      right: 14px;
+      top: 10px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: clamp(15px, 1.05vw, 20px);
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      color: #7c2d12;
+      background: rgba(255,237,213,.96);
+      border: 2px solid rgba(234,88,12,.22);
+    }
+
+    .students-layer {
+      z-index: 8;
+      pointer-events: none;
+    }
+
+    .student-seat {
+      position: absolute;
+      width: var(--seat-w);
+      height: var(--seat-h);
+      transform: translate(-50%, -50%) rotate(var(--rotation, 0deg)) scale(var(--scale, 1));
+      display: grid;
+      place-items: center;
+      transition:
+        left .58s cubic-bezier(.22, 1, .36, 1),
+        top .58s cubic-bezier(.22, 1, .36, 1),
+        transform .58s cubic-bezier(.22, 1, .36, 1),
+        filter .25s ease;
+      filter: drop-shadow(0 9px 9px rgba(15,23,42,.13));
+    }
+
+    .student-seat svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .student-seat .seat-num {
+      font-size: 23px;
+      font-weight: 1000;
+      fill: white;
+      paint-order: stroke;
+      stroke: rgba(0,0,0,.24);
+      stroke-width: 3px;
+    }
+
+    .student-seat .counter {
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: rotate(var(--counter-rotation, 0deg));
+    }
+
+    .student-seat .sl-text {
+      font-size: 22px;
+      font-weight: 1000;
+      fill: white;
+      paint-order: stroke;
+      stroke: rgba(0,0,0,.18);
+      stroke-width: 2px;
+      letter-spacing: -1px;
+    }
+
+    .student-seat.slow {
+      filter: drop-shadow(0 10px 10px rgba(15,23,42,.18));
+    }
+
+    .drawing-canvas {
+      width: 100%;
+      height: 100%;
+      z-index: 70;
+      pointer-events: none;
+      touch-action: none;
+    }
+
+    .stage[data-pen="on"] .drawing-canvas { pointer-events: auto; }
+
+    .tokens-layer {
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    .teacher-token {
+      position: absolute;
+      left: 50%;
+      top: 16%;
+      width: var(--teacher-size);
+      height: var(--teacher-size);
+      transform: translate(-50%, -50%);
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      background: transparent;
+      pointer-events: auto;
+      touch-action: none;
+      cursor: grab;
+      filter: drop-shadow(0 15px 12px rgba(15,23,42,.24));
+      transition: filter .16s ease, transform .16s ease;
+    }
+
+    .teacher-token:focus-visible {
+      outline: 6px solid rgba(37,99,235,.65);
+      outline-offset: 6px;
+    }
+
+    .teacher-token.dragging {
+      cursor: grabbing;
+      transform: translate(-50%, -50%) scale(1.07);
+      filter: drop-shadow(0 20px 16px rgba(15,23,42,.32));
+      z-index: 100;
+    }
+
+    .teacher-token svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      display: block;
+    }
+
+    .token-label {
+      position: absolute;
+      left: 50%;
+      bottom: -14px;
+      transform: translateX(-50%);
+      min-width: 84px;
+      padding: 4px 10px 5px;
+      border-radius: 999px;
+      background: rgba(15,23,42,.86);
+      color: #fff;
+      text-align: center;
+      font-size: clamp(12px, .82vw, 16px);
+      font-weight: 1000;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      box-shadow: 0 6px 14px rgba(15,23,42,.18);
+    }
+
+    .motion-trail {
+      position: absolute;
+      width: var(--teacher-size);
+      height: var(--teacher-size);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 55;
+      opacity: .34;
+      filter: blur(.2px) saturate(.95);
+      animation: trailFade 1s ease-out forwards;
+    }
+
+    .motion-trail svg { width: 100%; height: 100%; display: block; }
+
+    @keyframes trailFade {
+      0% { opacity: .34; transform: translate(-50%, -50%) scale(.96); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(.72); }
+    }
+
+    .shake-once { animation: shake .35s ease; }
+
+    @keyframes shake {
+      0%,100% { transform: translate(-50%, -50%) rotate(0); }
+      25% { transform: translate(-50%, -50%) rotate(-2deg); }
+      75% { transform: translate(-50%, -50%) rotate(2deg); }
+    }
+
+    @media (max-width: 1280px) {
+      .app { padding: 10px; gap: 10px; }
+      .toolbar { grid-template-columns: 1fr; min-height: 0; }
+      .controls { justify-items: start; }
+      .control-group { justify-content: flex-start; }
+      .stage { width: 100%; max-height: calc(100dvh - 230px); }
+    }
+
+    @media (max-height: 760px) {
+      .toolbar { min-height: 108px; }
+      .subline { display: none; }
+      .btn { min-height: 40px; font-size: 14px; padding: 0 10px; border-radius: 12px; }
+      .color-btn { width: 32px; height: 32px; border-width: 3px; }
+      .stage { max-height: calc(100dvh - 134px); width: min(100%, calc((100dvh - 134px) * 16 / 9)); }
+    }
+
+    :fullscreen .app {
+      background: radial-gradient(circle at top, #22314e 0%, #101827 45%, #0b1020 100%);
+      padding: 8px;
+    }
+
+    :fullscreen .toolbar { min-height: 96px; }
+    :fullscreen .stage { max-height: calc(100dvh - 112px); width: min(100%, calc((100dvh - 112px) * 16 / 9)); }
+  </style>
+</head>
+<body>
+  <main class="app" id="app">
+    <section class="toolbar" aria-label="배치도 조작 영역">
+      <div class="title-wrap">
+        <h1>협력수업 전략 배치도</h1>
+        <div class="subline" aria-label="범례">
+          <span class="legend-item"><span class="legend-dot">T</span> 담임교사</span>
+          <span class="legend-item"><span class="legend-dot">CT</span> 협력교사</span>
+          <span class="legend-item"><span class="legend-sl-icon" aria-hidden="true"><svg viewBox="0 0 78 56"><path d="M32 21C19 4 6 1 1 2c2 15 13 25 29 25z" fill="#777"/><path d="M44 21C56 4 70 1 76 2c-3 15-14 25-30 25z" fill="#777"/><ellipse cx="39" cy="36" rx="28" ry="15" fill="#777"/><text x="39" y="44" text-anchor="middle" font-size="19" font-weight="1000" font-family="Arial, sans-serif" fill="#fff">SL</text></svg></span>학습지원대상학생</span>
+          <span class="legend-item">24명 · 3분단(2열씩) · 6모둠</span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="control-group" aria-label="협력수업 전략 선택">
+          <button class="btn active" data-formation="support" type="button" aria-pressed="true">교수-지원</button>
+          <button class="btn" data-formation="alternative" type="button" aria-pressed="false">대안교수</button>
+          <button class="btn" data-formation="observe" type="button" aria-pressed="false">교수-관찰</button>
+          <button class="btn" data-formation="station" type="button" aria-pressed="false">스테이션 교수</button>
+          <button class="btn" data-formation="team" type="button" aria-pressed="false">팀티칭</button>
+          <button class="btn" data-formation="parallel" type="button" aria-pressed="false">평행교수</button>
+        </div>
+        <div class="control-group tools" aria-label="그리기 및 화면 조작">
+          <button class="btn secondary" id="penBtn" type="button" aria-pressed="false">✎ 펜</button>
+          <div class="palette" aria-label="펜 색상 선택">
+            <button class="color-btn selected" data-color="#111827" style="--swatch:#111827" type="button" aria-label="검정 펜"></button>
+            <button class="color-btn" data-color="#e11d48" style="--swatch:#e11d48" type="button" aria-label="빨강 펜"></button>
+            <button class="color-btn" data-color="#2563eb" style="--swatch:#2563eb" type="button" aria-label="파랑 펜"></button>
+            <button class="color-btn" data-color="#16a34a" style="--swatch:#16a34a" type="button" aria-label="초록 펜"></button>
+            <button class="color-btn" data-color="#f97316" style="--swatch:#f97316" type="button" aria-label="주황 펜"></button>
+            <button class="color-btn" data-color="#7c3aed" style="--swatch:#7c3aed" type="button" aria-label="보라 펜"></button>
+          </div>
+          <button class="btn secondary" id="undoBtn" type="button">↶ 되돌리기</button>
+          <button class="btn danger" id="clearDrawingBtn" type="button">그리기 초기화</button>
+          <button class="btn secondary" id="resetBtn" type="button">교사 위치 초기화</button>
+          <button class="btn secondary" id="fullBtn" type="button">전체화면</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="stage-shell">
+      <div class="stage" id="stage" data-mode="support" data-pen="off" aria-label="협력수업 전략 배치도">
+        <div class="front-board">칠판 · 전면</div>
+        <div class="formation-title" id="formationTitle">
+          <strong id="formationName">교수-지원</strong>
+          <small id="formationDesc">교사는 칠판 앞, 협력교사는 학생들 사이에서 개별 지원</small>
+        </div>
+        <div class="status-chip" id="statusChip"><span>🌱</span><span><strong>SL</strong> 모둠별 1명 배치</span></div>
+
+        <div id="divisionZones" aria-hidden="true"></div>
+        <div id="parallelZones" aria-hidden="true"></div>
+        <div id="groupTables" aria-hidden="true"></div>
+        <div class="support-table" id="supportTable" data-label="CT" aria-hidden="true"></div>
+        <div class="students-layer" id="studentsLayer" aria-hidden="true"></div>
+        <canvas class="drawing-canvas" id="drawingCanvas" aria-label="펜 그리기 영역"></canvas>
+
+        <div class="tokens-layer" aria-label="교사 말판 영역">
+          <button class="teacher-token" id="teacherToken" type="button" aria-label="담임교사 말판: 드래그하여 이동">
+            <span class="token-label">담임교사</span>
+          </button>
+          <button class="teacher-token" id="coTeacherToken" type="button" aria-label="협력교사 말판: 드래그하여 이동">
+            <span class="token-label">협력교사</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const stage = document.getElementById('stage');
+      const studentsLayer = document.getElementById('studentsLayer');
+      const groupTables = document.getElementById('groupTables');
+      const divisionZones = document.getElementById('divisionZones');
+      const parallelZones = document.getElementById('parallelZones');
+      const formationName = document.getElementById('formationName');
+      const formationDesc = document.getElementById('formationDesc');
+      const statusChip = document.getElementById('statusChip');
+      const formationButtons = Array.from(document.querySelectorAll('[data-formation]'));
+      const resetBtn = document.getElementById('resetBtn');
+      const fullBtn = document.getElementById('fullBtn');
+      const penBtn = document.getElementById('penBtn');
+      const undoBtn = document.getElementById('undoBtn');
+      const clearDrawingBtn = document.getElementById('clearDrawingBtn');
+      const colorButtons = Array.from(document.querySelectorAll('.color-btn'));
+      const drawingCanvas = document.getElementById('drawingCanvas');
+      const ctx = drawingCanvas.getContext('2d');
+      const tokensLayer = document.querySelector('.tokens-layer');
+      const teacherToken = document.getElementById('teacherToken');
+      const coTeacherToken = document.getElementById('coTeacherToken');
+
+      const basicX = [12, 27.2, 42.4, 57.6, 72.8, 88];
+      const basicY = [31, 45, 59, 73];
+      const altRegularY = [29.5, 42.5, 55.5];
+
+      const stationCenters = [
+        { x: 21.5, y: 39 }, { x: 50, y: 39 }, { x: 78.5, y: 39 },
+        { x: 21.5, y: 67 }, { x: 50, y: 67 }, { x: 78.5, y: 67 }
+      ];
+
+      const stationOffsets = [
+        { slot: 'top', dx: 0, dy: -8.9 },
+        { slot: 'left', dx: -7.8, dy: 0 },
+        { slot: 'right', dx: 7.8, dy: 0 },
+        { slot: 'bottom', dx: 0, dy: 8.9 }
+      ];
+
+      const alternativeCenter = { x: 50, y: 72 };
+      const alternativeOffsets = [
+        { slot: 'top', dx: -9.6, dy: -8.2 },
+        { slot: 'top', dx: 0, dy: -8.2 },
+        { slot: 'top', dx: 9.6, dy: -8.2 },
+        { slot: 'left', dx: -12.6, dy: .8 },
+        { slot: 'right', dx: 12.6, dy: .8 },
+        { slot: 'bottom', dx: 0, dy: 8.8 }
+      ];
+
+      const formations = {
+        support: {
+          title: '교수-지원',
+          desc: '교사는 칠판 앞, 협력교사는 학생들 사이에서 개별 지원',
+          status: '<span>3분단</span><span><strong>1·2열=1분단</strong> · 3·4열=2분단 · 5·6열=3분단</span>',
+          tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 52 } }
+        },
+        alternative: {
+          title: '대안교수',
+          desc: 'SL 지원 모둠을 따로 구성하고 협력교사가 소그룹 지도',
+          status: '<span>대안</span><span><strong>SL 지원 소그룹</strong> · CT 집중 지도</span>',
+          tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 86 } }
+        },
+        observe: {
+          title: '교수-관찰',
+          desc: '교사는 전면 수업, 협력교사는 뒤에서 관찰',
+          status: '<span>관찰</span><span><strong>CT 뒤쪽 배치</strong> · 수업 관찰/기록</span>',
+          tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 12, y: 83 } }
+        },
+        station: {
+          title: '스테이션 교수',
+          desc: '6모둠 순환 활동, 모둠별 SL 1명 배치',
+          status: '<span>🌱</span><span><strong>6모둠</strong> · 모둠별 SL 1명</span>',
+          tokens: { teacherToken: { x: 24, y: 29 }, coTeacherToken: { x: 76, y: 78 } }
+        },
+        team: {
+          title: '팀티칭',
+          desc: '두 교사가 함께 칠판 앞에서 동시에 수업 진행',
+          status: '<span>공동</span><span><strong>T + CT</strong> 전면 공동 지도</span>',
+          tokens: { teacherToken: { x: 45, y: 16.5 }, coTeacherToken: { x: 55, y: 16.5 } }
+        },
+        parallel: {
+          title: '평행교수',
+          desc: '앞반은 담임교사, 뒷반은 협력교사가 동시에 지도',
+          status: '<span>병행</span><span><strong>앞: T</strong> · 뒤: CT</span>',
+          tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 86 } }
+        }
+      };
+
+      const slowSlotByGroup = [3, 1, 2, 0, 3, 1];
+      const students = [];
+      for (let group = 1; group <= 6; group += 1) {
+        for (let row = 0; row < 4; row += 1) {
+          const number = (row * 6) + group;
+          students.push({
+            id: `student-${number}`,
+            number,
+            group,
+            division: Math.floor((group - 1) / 2) + 1,
+            column: group - 1,
+            row,
+            slow: row === slowSlotByGroup[group - 1]
+          });
+        }
+      }
+
+      const slowStudents = students.filter(student => student.slow).sort((a, b) => a.group - b.group);
+      const regularStudents = students.filter(student => !student.slow).sort((a, b) => a.number - b.number);
+      const regularAlternativeIndex = new Map(regularStudents.map((student, index) => [student.id, index]));
+      const slowAlternativeIndex = new Map(slowStudents.map((student, index) => [student.id, index]));
+
+      let mode = 'support';
+      let penActive = false;
+      let penColor = '#111827';
+      let strokes = [];
+      let currentStroke = null;
+      let activeDrawingPointer = null;
+
+      function sunSvg(text) {
+        const labelSize = text.length > 1 ? 28 : 34;
+        return `
+          <svg viewBox="0 0 100 100" role="img" aria-hidden="true">
+            <g stroke="#ff8a24" stroke-width="4.8" stroke-linecap="round">
+              <line x1="50" y1="4" x2="50" y2="17"></line>
+              <line x1="50" y1="83" x2="50" y2="96"></line>
+              <line x1="4" y1="50" x2="17" y2="50"></line>
+              <line x1="83" y1="50" x2="96" y2="50"></line>
+              <line x1="17.5" y1="17.5" x2="27" y2="27"></line>
+              <line x1="73" y1="73" x2="82.5" y2="82.5"></line>
+              <line x1="17.5" y1="82.5" x2="27" y2="73"></line>
+              <line x1="73" y1="27" x2="82.5" y2="17.5"></line>
+            </g>
+            <circle cx="50" cy="50" r="30" fill="#ff9d37"></circle>
+            <circle cx="50" cy="50" r="30" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="3"></circle>
+            <text x="50" y="61" text-anchor="middle" font-size="${labelSize}" font-weight="1000" font-family="Arial, sans-serif" fill="#fff">${text}</text>
+          </svg>`;
+      }
+
+      function slowBadgeSvg() {
+        return `
+          <g class="sl-badge counter">
+            <path d="M60 39 C48 23 35 20 30 22 C32 36 43 45 59 45 Z" fill="#777"></path>
+            <path d="M68 39 C80 23 93 20 98 22 C96 36 85 45 69 45 Z" fill="#777"></path>
+            <path d="M64 43 C64 35 64 28 64 21" stroke="#777" stroke-width="5" stroke-linecap="round"></path>
+            <ellipse cx="64" cy="68" rx="30" ry="16" fill="#777"></ellipse>
+            <text class="sl-text" x="64" y="76" text-anchor="middle">SL</text>
+          </g>`;
+      }
+
+      function studentSvg(student) {
+        if (student.slow) {
+          return `
+            <svg viewBox="0 0 128 100" aria-hidden="true">
+              <rect x="14" y="10" width="100" height="42" rx="2" fill="#ffffff" stroke="#111111" stroke-width="5"></rect>
+              ${slowBadgeSvg()}
+            </svg>`;
+        }
+
+        return `
+          <svg viewBox="0 0 128 100" aria-hidden="true">
+            <rect x="14" y="10" width="100" height="42" rx="2" fill="#ffffff" stroke="#111111" stroke-width="5"></rect>
+            <circle cx="64" cy="54" r="24" fill="#868686"></circle>
+            <text class="seat-num counter" x="64" y="62" text-anchor="middle">${student.number}</text>
+          </svg>`;
+      }
+
+      function renderStaticLayers() {
+        const divisions = [
+          { label: '1분단', note: '1·2열', left: 5.4, width: 29.2 },
+          { label: '2분단', note: '3·4열', left: 35.4, width: 29.2 },
+          { label: '3분단', note: '5·6열', left: 65.4, width: 29.2 }
+        ];
+
+        divisionZones.innerHTML = divisions.map(division => (
+          `<div class="division-zone" style="left:${division.left}%;width:${division.width}%"><span>${division.label} <em>${division.note}</em></span></div>`
+        )).join('');
+
+        groupTables.innerHTML = stationCenters.map((center, index) => (
+          `<div class="group-table" data-label="${index + 1}모둠" style="left:${center.x}%;top:${center.y}%"></div>`
+        )).join('');
+
+        parallelZones.innerHTML = `
+          <div class="parallel-zone front"><span>T 지도 영역</span></div>
+          <div class="parallel-zone back"><span>CT 지도 영역</span></div>`;
+
+        studentsLayer.innerHTML = students.map(student => (
+          `<div class="student-seat${student.slow ? ' slow' : ''}" id="${student.id}" data-group="${student.group}" data-division="${student.division}">${studentSvg(student)}</div>`
+        )).join('');
+      }
+
+      function positionStudents(nextMode) {
+        students.forEach(student => {
+          const el = document.getElementById(student.id);
+          if (!el) return;
+
+          let x = basicX[student.column];
+          let y = basicY[student.row];
+          let slot = 'basic';
+          let scale = 1;
+
+          if (nextMode === 'station') {
+            const center = stationCenters[student.group - 1];
+            const groupMembers = students
+              .filter(item => item.group === student.group)
+              .sort((a, b) => Number(b.slow) - Number(a.slow) || a.row - b.row);
+            const order = groupMembers.findIndex(item => item.id === student.id);
+            const offset = stationOffsets[order];
+            x = center.x + offset.dx;
+            y = center.y + offset.dy;
+            slot = offset.slot;
+            scale = .93;
+          } else if (nextMode === 'alternative') {
+            if (student.slow) {
+              const order = slowAlternativeIndex.get(student.id) || 0;
+              const offset = alternativeOffsets[order];
+              x = alternativeCenter.x + offset.dx;
+              y = alternativeCenter.y + offset.dy;
+              slot = offset.slot;
+              scale = .82;
+            } else {
+              const order = regularAlternativeIndex.get(student.id) || 0;
+              x = basicX[order % 6];
+              y = altRegularY[Math.floor(order / 6)];
+              slot = 'basic';
+              scale = .97;
+            }
+          }
+
+          const rotation = slot === 'left' ? -90 : slot === 'right' ? 90 : slot === 'bottom' ? 180 : 0;
+          el.style.left = `${x}%`;
+          el.style.top = `${y}%`;
+          el.style.setProperty('--rotation', `${rotation}deg`);
+          el.style.setProperty('--counter-rotation', `${-rotation}deg`);
+          el.style.setProperty('--scale', String(scale));
+          el.dataset.slot = slot;
+        });
+      }
+
+      function clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function setPercentPosition(el, point) {
+        const x = clamp(Number(point.x), 4, 96);
+        const y = clamp(Number(point.y), 6, 94);
+        el.style.left = `${x}%`;
+        el.style.top = `${y}%`;
+      }
+
+      function getPercentPosition(el) {
+        return {
+          x: parseFloat(el.style.left) || 50,
+          y: parseFloat(el.style.top) || 16
+        };
+      }
+
+      function resetTokensToFormation(withShake) {
+        const formation = formations[mode] || formations.support;
+        setPercentPosition(teacherToken, formation.tokens.teacherToken);
+        setPercentPosition(coTeacherToken, formation.tokens.coTeacherToken);
+        if (withShake) {
+          teacherToken.classList.remove('shake-once');
+          coTeacherToken.classList.remove('shake-once');
+          void teacherToken.offsetWidth;
+          teacherToken.classList.add('shake-once');
+          coTeacherToken.classList.add('shake-once');
+        }
+      }
+
+      function setFormation(nextMode, shouldResetTokens) {
+        if (!formations[nextMode]) nextMode = 'support';
+        mode = nextMode;
+        const formation = formations[mode];
+        stage.dataset.mode = mode;
+        formationName.textContent = formation.title;
+        formationDesc.textContent = formation.desc;
+        statusChip.innerHTML = formation.status;
+
+        formationButtons.forEach(button => {
+          const isActive = button.dataset.formation === mode;
+          button.classList.toggle('active', isActive);
+          button.setAttribute('aria-pressed', String(isActive));
+        });
+
+        positionStudents(mode);
+        if (shouldResetTokens) resetTokensToFormation(false);
+      }
+
+      function makeDraggable(el) {
+        let activePointerId = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let lastTrailAt = 0;
+
+        function readPoint(event) {
+          const rect = stage.getBoundingClientRect();
+          const x = ((event.clientX - rect.left - offsetX) / rect.width) * 100;
+          const y = ((event.clientY - rect.top - offsetY) / rect.height) * 100;
+          return { x, y };
+        }
+
+        el.addEventListener('pointerdown', event => {
+          if (penActive || activePointerId !== null) return;
+          activePointerId = event.pointerId;
+          const elRect = el.getBoundingClientRect();
+          offsetX = event.clientX - (elRect.left + elRect.width / 2);
+          offsetY = event.clientY - (elRect.top + elRect.height / 2);
+          el.setPointerCapture(event.pointerId);
+          el.classList.add('dragging');
+          event.preventDefault();
+        }, { passive: false });
+
+        el.addEventListener('pointermove', event => {
+          if (event.pointerId !== activePointerId) return;
+          const now = performance.now();
+          if (now - lastTrailAt > 90) {
+            createTrail(el);
+            lastTrailAt = now;
+          }
+          setPercentPosition(el, readPoint(event));
+          event.preventDefault();
+        }, { passive: false });
+
+        function endDrag(event) {
+          if (event.pointerId !== activePointerId) return;
+          activePointerId = null;
+          el.classList.remove('dragging');
+          try { el.releasePointerCapture(event.pointerId); } catch (error) {}
+          event.preventDefault();
+        }
+
+        el.addEventListener('pointerup', endDrag, { passive: false });
+        el.addEventListener('pointercancel', endDrag, { passive: false });
+        el.addEventListener('lostpointercapture', () => {
+          activePointerId = null;
+          el.classList.remove('dragging');
+        });
+
+        el.addEventListener('keydown', event => {
+          const step = event.shiftKey ? 3 : 1;
+          const current = getPercentPosition(el);
+          let changed = true;
+          if (event.key === 'ArrowLeft') current.x -= step;
+          else if (event.key === 'ArrowRight') current.x += step;
+          else if (event.key === 'ArrowUp') current.y -= step;
+          else if (event.key === 'ArrowDown') current.y += step;
+          else changed = false;
+          if (changed) {
+            setPercentPosition(el, current);
+            event.preventDefault();
+          }
+        });
+      }
+
+      function createTrail(el) {
+        const svg = el.querySelector('svg');
+        if (!svg || !tokensLayer) return;
+        const trail = document.createElement('div');
+        trail.className = 'motion-trail';
+        trail.style.left = el.style.left;
+        trail.style.top = el.style.top;
+        trail.innerHTML = svg.outerHTML;
+        tokensLayer.appendChild(trail);
+        window.setTimeout(() => trail.remove(), 1050);
+      }
+
+      function setPenActive(nextValue) {
+        penActive = Boolean(nextValue);
+        stage.dataset.pen = penActive ? 'on' : 'off';
+        penBtn.classList.toggle('active', penActive);
+        penBtn.classList.toggle('pen-on', penActive);
+        penBtn.setAttribute('aria-pressed', String(penActive));
+        penBtn.textContent = penActive ? '✎ 펜 켜짐' : '✎ 펜';
+      }
+
+      function setPenColor(nextColor) {
+        penColor = nextColor;
+        colorButtons.forEach(button => {
+          button.classList.toggle('selected', button.dataset.color === penColor);
+        });
+        setPenActive(true);
+      }
+
+      function resizeCanvas() {
+        const rect = stage.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        drawingCanvas.width = Math.max(1, Math.round(rect.width * ratio));
+        drawingCanvas.height = Math.max(1, Math.round(rect.height * ratio));
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        redrawCanvas();
+      }
+
+      function canvasPoint(event) {
+        const rect = stage.getBoundingClientRect();
+        return {
+          x: clamp((event.clientX - rect.left) / rect.width, 0, 1),
+          y: clamp((event.clientY - rect.top) / rect.height, 0, 1)
+        };
+      }
+
+      function strokeWidthCss(stroke, rect) {
+        return Math.max(6, Math.min(13, rect.width * stroke.width));
+      }
+
+      function drawStroke(stroke) {
+        const rect = stage.getBoundingClientRect();
+        const points = stroke.points;
+        if (!points.length) return;
+        ctx.save();
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = stroke.color;
+        ctx.fillStyle = stroke.color;
+        ctx.lineWidth = strokeWidthCss(stroke, rect);
+
+        if (points.length === 1) {
+          ctx.beginPath();
+          ctx.arc(points[0].x * rect.width, points[0].y * rect.height, ctx.lineWidth / 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          return;
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x * rect.width, points[0].y * rect.height);
+        for (let index = 1; index < points.length; index += 1) {
+          const point = points[index];
+          ctx.lineTo(point.x * rect.width, point.y * rect.height);
+        }
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function redrawCanvas() {
+        const rect = stage.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+        strokes.forEach(drawStroke);
+      }
+
+      drawingCanvas.addEventListener('pointerdown', event => {
+        if (!penActive || activeDrawingPointer !== null) return;
+        activeDrawingPointer = event.pointerId;
+        currentStroke = {
+          color: penColor,
+          width: .0065,
+          points: [canvasPoint(event)]
+        };
+        strokes.push(currentStroke);
+        drawingCanvas.setPointerCapture(event.pointerId);
+        drawStroke(currentStroke);
+        event.preventDefault();
+      }, { passive: false });
+
+      drawingCanvas.addEventListener('pointermove', event => {
+        if (!penActive || event.pointerId !== activeDrawingPointer || !currentStroke) return;
+        const point = canvasPoint(event);
+        const lastPoint = currentStroke.points[currentStroke.points.length - 1];
+        const dx = point.x - lastPoint.x;
+        const dy = point.y - lastPoint.y;
+        if ((dx * dx + dy * dy) < 0.000004) {
+          event.preventDefault();
+          return;
+        }
+        currentStroke.points.push(point);
+        redrawCanvas();
+        event.preventDefault();
+      }, { passive: false });
+
+      function finishDrawing(event) {
+        if (event.pointerId !== activeDrawingPointer) return;
+        activeDrawingPointer = null;
+        currentStroke = null;
+        try { drawingCanvas.releasePointerCapture(event.pointerId); } catch (error) {}
+        event.preventDefault();
+      }
+
+      drawingCanvas.addEventListener('pointerup', finishDrawing, { passive: false });
+      drawingCanvas.addEventListener('pointercancel', finishDrawing, { passive: false });
+      drawingCanvas.addEventListener('contextmenu', event => event.preventDefault());
+
+      function undoDrawing() {
+        strokes.pop();
+        redrawCanvas();
+      }
+
+      function clearDrawing() {
+        strokes = [];
+        currentStroke = null;
+        redrawCanvas();
+      }
+
+      async function toggleFullscreen() {
+        try {
+          if (!document.fullscreenElement) {
+            await document.getElementById('app').requestFullscreen();
+            fullBtn.textContent = '전체화면 종료';
+          } else {
+            await document.exitFullscreen();
+            fullBtn.textContent = '전체화면';
+          }
+          window.setTimeout(resizeCanvas, 120);
+        } catch (error) {
+          alert('브라우저에서 전체화면 전환이 차단되었습니다. F11 키 또는 브라우저 전체화면 기능을 사용해 주세요.');
+        }
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        fullBtn.textContent = document.fullscreenElement ? '전체화면 종료' : '전체화면';
+        window.setTimeout(resizeCanvas, 120);
+      });
+
+      function init() {
+        teacherToken.insertAdjacentHTML('afterbegin', sunSvg('T'));
+        coTeacherToken.insertAdjacentHTML('afterbegin', sunSvg('CT'));
+        renderStaticLayers();
+        makeDraggable(teacherToken);
+        makeDraggable(coTeacherToken);
+        setFormation('support', false);
+        resetTokensToFormation(false);
+
+        formationButtons.forEach(button => {
+          button.addEventListener('click', () => setFormation(button.dataset.formation, true));
+        });
+
+        resetBtn.addEventListener('click', () => resetTokensToFormation(true));
+        fullBtn.addEventListener('click', toggleFullscreen);
+        penBtn.addEventListener('click', () => setPenActive(!penActive));
+        undoBtn.addEventListener('click', undoDrawing);
+        clearDrawingBtn.addEventListener('click', clearDrawing);
+        colorButtons.forEach(button => {
+          button.addEventListener('click', () => setPenColor(button.dataset.color));
+        });
+
+        window.addEventListener('resize', () => window.requestAnimationFrame(resizeCanvas));
+        window.addEventListener('orientationchange', () => window.setTimeout(resizeCanvas, 150));
+        document.addEventListener('keydown', event => {
+          const isUndo = (event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z';
+          if (isUndo) {
+            undoDrawing();
+            event.preventDefault();
+          }
+          if (event.key === 'Escape' && penActive) setPenActive(false);
+        });
+
+        resizeCanvas();
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
