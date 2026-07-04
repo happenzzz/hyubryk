@@ -518,7 +518,7 @@
     }
 
     .student-seat.individual-target::after {
-      content: "개별지원";
+      content: "특별지원";
       position: absolute;
       left: 50%;
       bottom: -16px;
@@ -717,7 +717,7 @@
         <h1>협력수업 전략 배치도</h1>
         <div class="subline" aria-label="범례">
           <span class="legend-item"><span class="legend-dot">T</span> 담임교사</span>
-          <span class="legend-item"><span class="legend-dot">CT</span> 협력교사</span>
+          <span class="legend-item"><span class="legend-dot">CT</span> 협력강사</span>
           <span class="legend-item"><span class="legend-sl-icon" aria-hidden="true"><svg viewBox="0 0 78 56"><path d="M32 21C19 4 6 1 1 2c2 15 13 25 29 25z" fill="#777"/><path d="M44 21C56 4 70 1 76 2c-3 15-14 25-30 25z" fill="#777"/><ellipse cx="39" cy="36" rx="28" ry="15" fill="#777"/><text x="39" y="44" text-anchor="middle" font-size="19" font-weight="1000" font-family="Arial, sans-serif" fill="#fff">SL</text></svg></span>학습지원대상학생</span>
           <span class="legend-item">24명 · 3분단(2열씩) · 6모둠</span>
         </div>
@@ -726,7 +726,7 @@
       <div class="controls">
         <div class="control-group" aria-label="협력수업 전략 선택">
           <button class="btn active" data-formation="support" type="button" aria-pressed="true">교수-지원</button>
-          <button class="btn" data-formation="individual" type="button" aria-pressed="false">개별지원 수업 모델</button>
+          <button class="btn" data-formation="individual" type="button" aria-pressed="false">특별지원 수업 유형</button>
           <button class="btn" data-formation="alternative" type="button" aria-pressed="false">대안교수</button>
           <button class="btn" data-formation="observe" type="button" aria-pressed="false">교수-관찰</button>
           <button class="btn" data-formation="station" type="button" aria-pressed="false">스테이션 교수</button>
@@ -756,7 +756,7 @@
         <div class="front-board">칠판 · 전면</div>
         <div class="formation-title" id="formationTitle">
           <strong id="formationName">교수-지원</strong>
-          <small id="formationDesc">교사는 칠판 앞, 협력교사는 학생들 사이에서 개별 지원</small>
+          <small id="formationDesc">교사는 칠판 앞, 협력강사는 학생들 사이에서 개별 지원</small>
         </div>
         <div class="status-chip" id="statusChip"><span>🌱</span><span><strong>SL</strong> 모둠별 1명 배치</span></div>
 
@@ -771,8 +771,8 @@
           <button class="teacher-token" id="teacherToken" type="button" aria-label="담임교사 말판: 드래그하여 이동">
             <span class="token-label">담임교사</span>
           </button>
-          <button class="teacher-token" id="coTeacherToken" type="button" aria-label="협력교사 말판: 드래그하여 이동">
-            <span class="token-label">협력교사</span>
+          <button class="teacher-token" id="coTeacherToken" type="button" aria-label="협력강사 말판: 드래그하여 이동">
+            <span class="token-label">협력강사</span>
           </button>
         </div>
       </div>
@@ -833,25 +833,25 @@
       const formations = {
         support: {
           title: '교수-지원',
-          desc: '교사는 칠판 앞, 협력교사는 학생들 사이에서 개별 지원',
+          desc: '교사는 칠판 앞, 협력강사는 학생들 사이에서 개별 지원',
           status: '<span>3분단</span><span><strong>1·2열=1분단</strong> · 3·4열=2분단 · 5·6열=3분단</span>',
           tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 52 } }
         },
         individual: {
-          title: '개별지원 수업 모델',
-          desc: '교사는 칠판 앞, 협력교사는 의자에 앉아 SL 학생 옆에서 고정 지원',
-          status: '<span>개별</span><span><strong>CT 의자 고정</strong> · SL 학생 옆 1:1 지원</span>',
+          title: '특별지원 수업 유형',
+          desc: '교사는 칠판 앞, 협력강사는 의자에 앉아 SL 학생 옆에서 고정 지원',
+          status: '<span>특별지원</span><span><strong>CT 의자 고정</strong> · SL 학생 옆 1:1 지원</span>',
           tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 51.4, y: 62.5 } }
         },
         alternative: {
           title: '대안교수',
-          desc: 'SL 지원 모둠을 따로 구성하고 협력교사가 소그룹 지도',
+          desc: 'SL 지원 모둠을 따로 구성하고 협력강사가 소그룹 지도',
           status: '<span>대안</span><span><strong>SL 지원 소그룹</strong> · CT 집중 지도</span>',
           tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 86 } }
         },
         observe: {
           title: '교수-관찰',
-          desc: '교사는 전면 수업, 협력교사는 뒤에서 관찰',
+          desc: '교사는 전면 수업, 협력강사는 뒤에서 관찰',
           status: '<span>관찰</span><span><strong>CT 뒤쪽 배치</strong> · 수업 관찰/기록</span>',
           tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 12, y: 83 } }
         },
@@ -869,7 +869,7 @@
         },
         parallel: {
           title: '평행교수',
-          desc: '앞반은 담임교사, 뒷반은 협력교사가 동시에 지도',
+          desc: '앞반은 담임교사, 뒷반은 협력강사가 동시에 지도',
           status: '<span>병행</span><span><strong>앞: T</strong> · 뒤: CT</span>',
           tokens: { teacherToken: { x: 50, y: 16.5 }, coTeacherToken: { x: 50, y: 86 } }
         }
@@ -1081,8 +1081,8 @@
         coTeacherToken.setAttribute(
           'aria-label',
           mode === 'individual'
-            ? '협력교사 말판: 개별지원 수업 모델에서는 SL 학생 옆 의자에 고정'
-            : '협력교사 말판: 드래그하여 이동'
+            ? '협력강사 말판: 특별지원 수업 유형에서는 SL 학생 옆 의자에 고정'
+            : '협력강사 말판: 드래그하여 이동'
         );
 
         formationButtons.forEach(button => {
@@ -1113,7 +1113,7 @@
           if (!el) return;
           el.setAttribute('role', 'button');
           el.setAttribute('tabindex', '0');
-          el.setAttribute('aria-label', `${student.number}번 SL 학생 옆에 협력교사 고정`);
+          el.setAttribute('aria-label', `${student.number}번 SL 학생 옆에 협력강사 고정`);
           el.addEventListener('click', () => selectIndividualTarget(student.id));
           el.addEventListener('keydown', event => {
             if (event.key === 'Enter' || event.key === ' ') {
